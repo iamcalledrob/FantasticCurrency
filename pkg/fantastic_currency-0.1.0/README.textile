@@ -1,0 +1,92 @@
+h1. Fantastic Currency
+
+Currency magic with Active Record & Rails.
+
+h1. Install
+
+<pre><code>
+  gem install fantastic_currency
+
+  config.gem "fantastic_currency" (put in environment.rb)
+</code></pre>
+
+h1. Usage & Examples
+
+Let's imagine you're building an online shop, and you want to manage items which have a price, and a shipping price.
+You operate from the US and the UK, some of your items are for sale in US Dollars, others in British Pounds.
+
+*In your model:*
+<pre><code>
+  class Products < ActiveRecord::Base
+    currency :price
+    currency :shipping_price
+  end
+</code></pre>
+This will ensure your monetary values are stored safely in the database.
+You should store the relevant 3-letter currency code in your table in a column named @currency@.
+If you do not do this, you will have to pass in a :currency => :something whenever you access the field,
+otherwise the default currency, USD is assumed.
+
+You can work with your currencies like this:
+<pre><code>
+  record.price = "42.50"
+  record.price                      # => 42.5 (as BigDecimal)
+  record.price :format => true      # => $42.50
+  record.price :format => true,
+    :convert_to => :GBP             # => £26.80
+    
+  record.price = "12345.67"
+  record.price :format => true,
+    :delimiter => "-",
+    :separator => "_"               # => $12_345-67
+  
+  record.price = 500
+  record.price :format => true      # => $500
+  record.price :format => true,
+    :extra_zeros => true            # => $500.00
+  record.price :format => true,
+    :before_unit => "(",
+    :after_unit => ")"              # => ($)500
+
+  record.price = 0
+  record.price :format => true,
+    :free_as_text => true           # => "free"
+  
+</code></pre>
+
+*No floats are allowed* When setting a currency field, feel free to use a string, an integer, or a bigdecimal.
+Do not use floats, because they are not accurate enough. You'll get told off if you try to! 
+
+You can also manually call the currency formatter from within a model or controller.
+Note that you will need to manually specify the currency in this case.
+<pre><code>
+  format_currency(4280, :format => true, :currency => :GBP)         # => £42.80
+
+  format_currency(4280, :format => true,
+    :currency => :GBP, :precise_input => true)                      # => £4280
+  
+  format_currency("4280.50", :format => true,
+    :currency => :GBP, :precise_input => true)                      # => £4280.50
+  
+  format_currency("42", :currency => :GBP,
+    :convert_to => :USD, :precise_input => true)                    # => 65.70
+</code></pre>
+
+
+h1. Configuration
+
+By default, a few currencies are set up, but you may wish to configure your own.
+If you do, in environment.rb (or anywhere you like) you can do something like this:
+
+<pre><code>
+  FantasticCurrency::Config.define_currencies({
+    :USD => { :symbol => "$", :precision => 2, :name => "US Dollars", :nominal_value => 1 },
+    :GBP => { :symbol => "£", :precision => 2, :name => "British Pounds", :nominal_value => "1.5666" },
+    :CAD => { :symbol => "CA $", :precision => 2, :name => "Canadian Dollars", :nominal_value => "0.95" },
+    :AUD => { :symbol => "AU $", :precision => 2, :name => "Australian Dollars", :nominal_value => "0.8886" }
+  })
+</code></pre>
+
+Nominal value is used for converting between currencies. An easy way to work this out is to make your first currency's nominal value 1, and then work out all the following currencies values, in comparison to the first. E.g. 1 USD = 1 USD. 1 GBP = 1.5666 USD. etc.
+
+You may wish to write an automated system for generating and storing these nominal values based on current market values. That is up to you.
