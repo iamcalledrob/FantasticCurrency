@@ -118,10 +118,8 @@ module FantasticCurrency
         define_method "#{field_name.to_s}=" do |value|
           raise "Money doesn't float!" if value.class.name == "Float"
           
-          if self[field_name]
-            currency = FantasticCurrency::Config.get_currency(self[:currency])
-            self[field_name] = (BigDecimal.new(value.to_s) * (10**currency[:precision])).to_i
-          end
+          currency = FantasticCurrency::Config.get_currency(self[:currency])
+          self[field_name] = (BigDecimal.new(value.to_s) * (10**currency[:precision])).to_i
         end
         
       end
