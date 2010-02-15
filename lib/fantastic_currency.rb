@@ -57,7 +57,7 @@ module FantasticCurrency
           :separator => options[:separator])
         
         if options[:display_unit] == true
-          unit_to_display = if options[:full_symbols] ? active_currency[:symbol] : active_currency[:symbol_short] || active_currency[:symbol]
+          unit_to_display = options[:full_symbols] ? active_currency[:symbol] : active_currency[:symbol_short] || active_currency[:symbol]
           options[:before_unit] + unit_to_display + options[:after_unit] + value_as_string
         else
           value_as_string
