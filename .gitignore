@@ -2,4 +2,7 @@ pkg
 doc
 Manifest
 .*
+.DS_Store
+.AppleDouble
+._*
 !.gitignore

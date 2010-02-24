@@ -26,7 +26,7 @@ module FantasticCurrency
         value = BigDecimal.new(value.to_s) * 10**FantasticCurrency::Config.get_currency(options[:currency])[:precision]
       end
       
-      if options[:convert_to]
+      if options[:convert_to] and options[:convert_to] != options[:currency]
         source_currency = FantasticCurrency::Config.get_currency(options[:currency])
         dest_currency = FantasticCurrency::Config.get_currency(options[:convert_to])
         value = value * BigDecimal.new(source_currency[:nominal_value].to_s) / BigDecimal.new(dest_currency[:nominal_value].to_s)
@@ -114,6 +114,8 @@ module FantasticCurrency
             format_currency(self[field_name], { :currency => self[:currency] }.merge(args.first || {}))
           end
         end
+        
+        alias_method "#{field_name.to_s}_before_type_cast", "#{field_name}"
     
         define_method "#{field_name.to_s}=" do |value|
           raise "Money doesn't float!" if value.class.name == "Float"
